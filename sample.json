@@ -6,5 +6,9 @@
     "tableName2": {
         "key1": "string",
         "key2": "integer"
+    },
+    "tableName3": {
+        "key1": 55,
+        "key2": 44.4
     }
 }

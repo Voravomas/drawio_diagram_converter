@@ -85,7 +85,7 @@ class Page:
         :param f_name: name of a resulting file
         """
         if not f_name.endswith(".drawio"):
-            raise Exception("Error: Resulting file must end with .drawio")
+            raise Exception("Resulting file must end with .drawio")
         for table in self.tables:
             # check for mandatory fields in table (Default none)
             # check for MANDATORY_TYPES variable
@@ -112,7 +112,7 @@ class Page:
             raw_json = json.load(f)
         # check file if not empty
         if len(raw_json) == 0:
-            raise Exception("Error: file is empty")
+            raise Exception("file is empty")
         for key, value in raw_json.items():
             # checking row
             self.check_row(value)
@@ -136,7 +136,7 @@ class Page:
         :param value: value type of row
         """
         if value not in ACCEPTABLE_VALUE_TYPES:
-            raise Exception(f"Error: Type {value} is not allowed to be a value")
+            raise Exception(f"Type {value} is not allowed to be a value")
 
     @staticmethod
     def check_mandatory(table: dict) -> None:
@@ -146,7 +146,7 @@ class Page:
         """
         for elm in MANDATORY_TYPES:
             if elm not in table:
-                raise Exception(f"Error: {elm} not found in table")
+                raise Exception(f"{elm} not found in table")
 
     @staticmethod
     def check_json(name: str) -> None:
@@ -156,10 +156,10 @@ class Page:
         """
         # if it exists
         if not path.exists(name):
-            raise Exception("Error: File not found")
+            raise Exception("File not found")
         # if it is in json format
         if not name.endswith(".json"):
-            raise Exception("Error: File does not end with .json")
+            raise Exception("File does not end with .json")
 
     @staticmethod
     def check_row(row: dict) -> None:
@@ -172,4 +172,4 @@ class Page:
         """
         for value in row.values():
             if type(value) not in [str, int, float, complex]:
-                raise Exception("Error: child value is not acceptable")
+                raise Exception("child value is not acceptable")
