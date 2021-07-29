@@ -1,0 +1,10 @@
+{
+    "tableName1": {
+        "key1": "string",
+        "key2": "integer"
+    },
+    "tableName2": {
+        "key1": "string",
+        "key2": "integer"
+    }
+}

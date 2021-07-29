@@ -1,116 +1,175 @@
-from typing import Optional
-import copy
+import json
 import random
 import string
 
-ACCEPTABLE_VALUE_TYPES = ['string', 'integer', 'bool', 'datetime']
-MANDATORY_TYPES = []
-BASE_START_TABLE_X_AXIS = 160
-BASE_START_TABLE_Y_AXIS = 104
-BASE_TABLE_X_AXIS_DIFFERENCE = 200
-BASE_START_ROW_Y_AXIS = 26
-DEFAULT_FILE_NAME = "result.drawio"
+from typing import Optional
+from os import path
 
-BASE_PAGE = """
-<mxfile host="65bd71144e">
-    <diagram id="P0SbFD_KFt-Lh6b_J3Es" name="Page-1">
-        <mxGraphModel dx="642" dy="83" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
-            <root>
-                <mxCell id="0"/>
-                <mxCell id="1" parent="0"/>
-                {}
-            </root>
-        </mxGraphModel>
-    </diagram>
-</mxfile>
-"""
-
-BASE_TABLE = """
-\t\t\t\t<object label="{}" id="{}">
-\t\t\t\t    <mxCell style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=26;fillColor=#60a917;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;strokeColor=#2D7600;fontColor=#ffffff;" parent="1" vertex="1">
-\t\t\t\t        <mxGeometry x="{}" y="80" width="190" height="{}" as="geometry">
-\t\t\t\t            <mxRectangle x="310" y="160" width="130" height="26" as="alternateBounds"/>
-\t\t\t\t        </mxGeometry>
-\t\t\t\t    </mxCell>
-\t\t\t\t</object>
-"""
-# label = name of table
-# id = any
-# x = x-axis (difference by 200)
-# y = y_axis (start 104, step 26)
-
-BASE_ROW = """
-\t\t\t\t<mxCell id="{}" value="{}" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" parent="{}" vertex="1">
-\t\t\t\t    <mxGeometry y="{}" width="190" height="26" as="geometry"/>
-\t\t\t\t</mxCell>
-"""
-# id = any
-# value = row_value
-# parent = table_parent
-# y = 26 * N
-
+from constants import *
 
 
 class Table:
-    def __init__(self, name: str, rows: Optional[dict] = None):
+    """
+    Table is an abstraction for table in draw.io
+    """
+
+    def __init__(self, name: str, rows: Optional[dict] = None) -> None:
+        """
+        Init method for table
+        :param name: Name of table
+        :param rows: Rows in table
+        """
         self.name = name
         self.rows = rows if rows else dict()
 
 
 class Page:
     def __init__(self):
+        """
+        Page is an abstraction for whole page in draw.io.
+        There are objects on a page
+        """
         self.tables = []
 
-    def export(self, to_file: Optional[str] = DEFAULT_FILE_NAME):
+    def export(self, to_file: Optional[str] = DEFAULT_FILE_NAME) -> None:
+        """
+        Main method that converts tables on a page into xml (drawio format)
+        :param to_file: Path of resulting .drawio file
+        """
+        # check tables are correct
         self.overall_check(to_file)
-        table_x_axis = copy.deepcopy(BASE_START_TABLE_X_AXIS)
-        main_str = ""
+
+        table_x_axis = BASE_START_TABLE_X_AXIS
+        main_str = ""  # all text is written here
         for table in self.tables:
+            # configuring table id and height
             table_id = self.gen_id()
             table_height = BASE_START_ROW_Y_AXIS * (len(table.rows) + 1)
-            main_str += copy.deepcopy(BASE_TABLE).format(table.name,
-                                                         table_id,
-                                                         table_x_axis,
-                                                         table_height)
+            # adding table to main_str
+            main_str += BASE_TABLE.format(table.name,
+                                          table_id,
+                                          table_x_axis,
+                                          table_height)
 
-            row_y_axis = copy.deepcopy(BASE_START_ROW_Y_AXIS)
+            row_y_axis = BASE_START_ROW_Y_AXIS
             for r_key, r_value in table.rows.items():
+                # configuring id and row value for row
                 row_id = self.gen_id()
                 row_value = f"{r_key}: {r_value}"
-                main_str += copy.deepcopy(BASE_ROW).format(row_id,
-                                                           row_value,
-                                                           table_id,
-                                                           row_y_axis)
+                # adding row to table
+                main_str += BASE_ROW.format(row_id,
+                                            row_value,
+                                            table_id,
+                                            row_y_axis)
                 row_y_axis += BASE_START_ROW_Y_AXIS
             table_x_axis += BASE_TABLE_X_AXIS_DIFFERENCE
 
-        export_string = copy.deepcopy(BASE_PAGE).format(main_str)
+        # adding all text to main XML code
+        export_string = BASE_PAGE.format(main_str)
+        # saving to file
         with open(to_file, "w") as f:
             f.write(export_string)
         return
 
-    def add_table(self, table: Table):
+    def add_table(self, table: Table) -> None:
+        """
+        Method that adds table to page
+        :param table: Table that will be added
+        """
         self.tables.append(table)
 
-    def overall_check(self, f_name):
-        assert f_name.endswith(".drawio")
+    def overall_check(self, f_name: str) -> None:
+        """
+        Method that checks all tables and name of resulting file
+        before exporting.
+        :param f_name: name of a resulting file
+        """
+        if not f_name.endswith(".drawio"):
+            raise Exception("Error: Resulting file must end with .drawio")
         for table in self.tables:
+            # check for mandatory fields in table (Default none)
+            # check for MANDATORY_TYPES variable
             self.check_mandatory(table.rows)
-            for elm in table.rows.values():
-                self.check_value(elm)
+            # check if row value types are correct
+            # check for ACCEPTABLE_VALUE_TYPES variable
+            # to turn it off set CHECK_VALUE_ENABLED to False
+            if CHECK_VALUE_ENABLED:
+                for elm in table.rows.values():
+                    self.check_value(elm)
+
+    def import_from_json(self, path_to_json: str) -> None:
+        """
+        Method that:
+        - imports data from json file
+        - converts to Table
+        - appends it to self.tables variable
+        :param path_to_json: name of json file
+        """
+        # check if json exists and in correct extension
+        self.check_json(path_to_json)
+        # load file
+        with open(path_to_json, "r") as f:
+            raw_json = json.load(f)
+        # check file if not empty
+        if len(raw_json) == 0:
+            raise Exception("Error: file is empty")
+        for key, value in raw_json.items():
+            # checking row
+            self.check_row(value)
+            # transforming data to Table and appending
+            self.tables.append(Table(key, value))
 
     @staticmethod
-    def gen_id():
+    def gen_id() -> str:
+        """
+        Method that generates random id
+        for table and rows
+        """
+        # symbols from which id is made
         chars = string.ascii_uppercase + string.digits
-        return ''.join(random.choice(chars) for _ in range(10))
+        return ''.join(random.choice(chars) for _ in range(ID_LENGTH))
 
     @staticmethod
     def check_value(value: str) -> None:
+        """
+        Method that checks if a row value is in allowed format
+        :param value: value type of row
+        """
         if value not in ACCEPTABLE_VALUE_TYPES:
-            raise Exception(f"Error: Type {value} does not exist")
+            raise Exception(f"Error: Type {value} is not allowed to be a value")
 
     @staticmethod
     def check_mandatory(table: dict) -> None:
+        """
+        Method that checks if there are required keys in table
+        :param table: all rows
+        """
         for elm in MANDATORY_TYPES:
             if elm not in table:
                 raise Exception(f"Error: {elm} not found in table")
+
+    @staticmethod
+    def check_json(name: str) -> None:
+        """
+        Method that checks if json file is correct
+        :param name: name of json file
+        """
+        # if it exists
+        if not path.exists(name):
+            raise Exception("Error: File not found")
+        # if it is in json format
+        if not name.endswith(".json"):
+            raise Exception("Error: File does not end with .json")
+
+    @staticmethod
+    def check_row(row: dict) -> None:
+        """
+        Method that checks if row is in needed type
+        Allowed types:
+        - string
+        - number
+        :param row: a row {"key": "value"}
+        """
+        for value in row.values():
+            if type(value) not in [str, int, float, complex]:
+                raise Exception("Error: child value is not acceptable")
