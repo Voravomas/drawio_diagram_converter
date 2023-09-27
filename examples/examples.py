@@ -1,5 +1,4 @@
-import constants
-from transformer import Table, Page
+from bin.transformer import Table, Page
 
 
 def example1(name: str) -> None:

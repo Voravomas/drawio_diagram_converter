@@ -5,7 +5,7 @@ import string
 from typing import Optional
 from os import path
 
-from constants import *
+from bin.constants import *
 
 
 class Table:
