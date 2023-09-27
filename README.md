@@ -1,23 +1,45 @@
-# drawio_diagram_converter
-1. Converts from `.json` to draw.io UML diagram<br />
-2. Converts from `dict` to draw.io UML diagram<br />
-Python 3.8<br />
-Usage in `example.py`<br />
-sample.json
-```
-{
-    "tableName1": {
-        "key1": "string",
-        "key2": "integer"
-    },
-    "tableName2": {
-        "key1": "string",
-        "key2": "integer"
-    },
-    "tableName3": {
-        "key1": 55,
-        "key2": 44.4
-    }
-}
-```
-![Resulting image](https://i.ibb.co/pw3mZrh/Screenshot-2021-07-29-at-20-45-01.png)
+# Draw.io Diagram Converter
+---
+
+`Draw.io Diagram Converter` allows you to manipulate with draw.io diagrams using Python.
+
+
+Contents
+========
+
+ * [Currently supported features](#currently-supported-features)
+ * [Installation](#installation)
+ * [Usage](#usage)
+ * [Want to contribute?](#want-to-contribute)
+
+
+### Currently supported features
+---
+
++ convert `.json` to draw.io UML diagram<br />
++ convert python `dict` to draw.io UML diagram<br />
+
+
+### Installation
+---
+
+TBA
+
+#### Tools required prior to installation
+---
+
++ Python3
+
+
+
+### Usage
+---
+
+See examples in `examples.py`
+
+
+### Want to Contribute?
+---
+
+You are more than welcome. <br />
+Just make a fork, then separate branch and create a PR to this repo.
