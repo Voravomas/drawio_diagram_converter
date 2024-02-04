@@ -1,5 +1,7 @@
-from bin.transformer import Table, Page
+from context import bin
 
+Table = bin.Table
+Page = bin.Page
 
 def example1(name: str) -> None:
     """
