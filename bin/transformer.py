@@ -66,6 +66,10 @@ class Page:
 
         # adding all text to main XML code
         export_string = BASE_PAGE.format(main_str)
+
+	# Removing leading empty lines
+        export_string = export_string.strip("\n")
+
         # saving to file
         with open(to_file, "w") as f:
             f.write(export_string)
